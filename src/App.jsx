@@ -12,12 +12,10 @@ function App() {
     <BrowserRouter>
       <div className="bg-[#0a0a0f] min-h-screen flex flex-col">
         <Navbar />
-        {/* pt-16 removed — Navbar is `sticky`, so it already occupies
-            its own space in normal document flow. Adding pt-16 here
-            was creating an extra 64px gap on top of the navbar's own
-            height, pushing the Hero's min-h-screen section below the
-            viewport. */}
-        <main className="flex-1">
+        {/* main is the flexible child of the flex-col wrapper above.
+            It automatically fills all remaining height after the
+            navbar, so no extra padding-top or vh math is needed here. */}
+        <main className="flex-1 flex flex-col">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/blog" element={<Blog />} />

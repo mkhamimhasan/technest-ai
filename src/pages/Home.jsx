@@ -76,8 +76,13 @@ const categories = [
 export default function Home() {
   return (
     <div>
-      {/* Hero */}
-      <section className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
+      {/* Hero
+          Uses flex-1 instead of min-h-screen / calc(100vh-*).
+          App.jsx's <main> is already a flex column that fills all
+          remaining space below the sticky navbar. Making this section
+          flex-1 lets it claim exactly that remaining space, no matter
+          what the navbar's actual height is (desktop or mobile). */}
+      <section className="relative flex-1 flex items-center justify-center overflow-hidden py-20">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-[#0a0a0f] to-cyan-900/20" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
