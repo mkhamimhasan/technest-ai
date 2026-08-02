@@ -101,17 +101,12 @@ export default function Home() {
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-8 leading-[1.3] tracking-tight">
             Discover the Future of{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 whitespace-nowrap">
               AI &amp; Technology
             </span>
           </h1>
 
-          <p className="text-gray-400 text-base sm:text-lg mb-9 max-w-xl mx-auto leading-relaxed">
-            Insights, tutorials, and deep dives into AI tools, web development,
-            and the technologies shaping tomorrow.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-9">
             <Link
               to="/blog"
               className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-sm font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 justify-center"
