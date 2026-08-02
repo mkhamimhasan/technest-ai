@@ -99,7 +99,7 @@ export default function Home() {
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-5 leading-[1.15] tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-8 leading-[1.3] tracking-tight">
             Discover the Future of{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
               AI &amp; Technology
