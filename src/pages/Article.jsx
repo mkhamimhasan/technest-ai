@@ -1,5 +1,5 @@
 import { Link, useParams, Navigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, ChevronRight, Facebook, Twitter, Linkedin, Link as LinkIcon } from "lucide-react";
+import { ArrowRight, ArrowLeft, ChevronRight, Share2, Link as LinkIcon } from "lucide-react";
 import { posts, getPostBySlug, getRelatedPosts } from "../data/posts";
 
 export default function Article() {
@@ -78,7 +78,7 @@ export default function Article() {
             aria-label="Share on Twitter"
             className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors"
           >
-            <Twitter size={16} />
+            <Share2 size={16} />
           </a>
           <a
             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
@@ -87,7 +87,7 @@ export default function Article() {
             aria-label="Share on Facebook"
             className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors"
           >
-            <Facebook size={16} />
+            <Share2 size={16} />
           </a>
           <a
             href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
@@ -96,7 +96,7 @@ export default function Article() {
             aria-label="Share on LinkedIn"
             className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors"
           >
-            <Linkedin size={16} />
+            <Share2 size={16} />
           </a>
           <button
             onClick={() => navigator.clipboard?.writeText(shareUrl)}
