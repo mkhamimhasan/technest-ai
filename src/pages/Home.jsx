@@ -87,28 +87,41 @@ export default function Home() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
 
-        <div className="relative text-center px-4 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-2 mb-6">
-            <Zap size={14} className="text-purple-400" />
-            <span className="text-purple-400 text-sm font-medium">Welcome to TechNest AI</span>
+        {/* Balanced hero text block: heading, subtitle, and buttons now
+            follow a consistent size ratio and spacing rhythm instead of
+            the heading being disproportionately large next to the
+            subtitle. */}
+        <div className="relative text-center px-4 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-1.5 mb-8">
+            <Zap size={13} className="text-purple-400" />
+            <span className="text-purple-300 text-xs font-medium tracking-wide">
+              Welcome to TechNest AI
+            </span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-5 leading-[1.15] tracking-tight">
             Discover the Future of{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-              AI & Technology
+              AI &amp; Technology
             </span>
           </h1>
 
-          <p className="text-gray-400 text-xl mb-8 max-w-2xl mx-auto">
-            Insights, tutorials, and deep dives into AI tools, web development, and the technologies shaping tomorrow.
+          <p className="text-gray-400 text-base sm:text-lg mb-9 max-w-xl mx-auto leading-relaxed">
+            Insights, tutorials, and deep dives into AI tools, web development,
+            and the technologies shaping tomorrow.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/blog" className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 justify-center">
-              Explore Articles <ArrowRight size={18} />
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/blog"
+              className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-sm font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 justify-center"
+            >
+              Explore Articles <ArrowRight size={16} />
             </Link>
-            <Link to="/about" className="border border-white/20 text-white font-semibold px-8 py-4 rounded-xl hover:bg-white/5 transition-colors">
+            <Link
+              to="/about"
+              className="border border-white/15 text-white text-sm font-semibold px-7 py-3.5 rounded-xl hover:bg-white/5 transition-colors"
+            >
               Learn More
             </Link>
           </div>
