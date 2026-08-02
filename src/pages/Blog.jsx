@@ -1,75 +1,26 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
+import { posts, categories as categoryList } from "../data/posts";
 
-const posts = [
-  {
-    id: 1,
-    title: "Top 10 AI Tools in 2025 You Must Try",
-    excerpt: "Discover the most powerful AI tools that are transforming how we work, create, and innovate.",
-    category: "AI Tools",
-    date: "July 28, 2025",
-    readTime: "5 min read",
-    image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&auto=format&fit=crop",
-    slug: "top-10-ai-tools-2025",
-  },
-  {
-    id: 2,
-    title: "React 19: What's New and Why It Matters",
-    excerpt: "A deep dive into React 19's new features and developer experience upgrades.",
-    category: "React",
-    date: "July 22, 2025",
-    readTime: "7 min read",
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop",
-    slug: "react-19-whats-new",
-  },
-  {
-    id: 3,
-    title: "The Rise of Agentic AI: Beyond Chatbots",
-    excerpt: "How autonomous AI agents are moving beyond simple chat to take real actions in the world.",
-    category: "Technology",
-    date: "July 15, 2025",
-    readTime: "6 min read",
-    image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format&fit=crop",
-    slug: "rise-of-agentic-ai",
-  },
-  {
-    id: 4,
-    title: "Tailwind CSS v4: Complete Guide",
-    excerpt: "Everything you need to know about Tailwind CSS v4 — new features and best practices.",
-    category: "Web Development",
-    date: "July 10, 2025",
-    readTime: "8 min read",
-    image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800&auto=format&fit=crop",
-    slug: "tailwind-css-v4-guide",
-  },
-  {
-    id: 5,
-    title: "Cybersecurity in the Age of AI",
-    excerpt: "How AI is both a threat and a defense in modern cybersecurity.",
-    category: "Cybersecurity",
-    date: "July 5, 2025",
-    readTime: "6 min read",
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop",
-    slug: "cybersecurity-age-of-ai",
-  },
-  {
-    id: 6,
-    title: "How to Start Freelancing as a Developer",
-    excerpt: "A practical guide to landing your first client and building a sustainable freelance career.",
-    category: "Freelancing",
-    date: "June 30, 2025",
-    readTime: "9 min read",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop",
-    slug: "start-freelancing-developer",
-  },
-];
-
-const categories = ["All", "AI Tools", "React", "Technology", "Web Development", "Cybersecurity", "Freelancing"];
+const categories = ["All", ...categoryList.map((c) => c.name)];
 
 export default function Blog() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
+
+  // Reads ?category=... from the URL (set when arriving from the
+  // Categories page) so a direct link can pre-filter the list.
+  const activeCategory = searchParams.get("category") || "All";
+
+  const setActiveCategory = (cat) => {
+    if (cat === "All") {
+      searchParams.delete("category");
+    } else {
+      searchParams.set("category", cat);
+    }
+    setSearchParams(searchParams);
+  };
 
   const filtered = posts.filter((p) => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());

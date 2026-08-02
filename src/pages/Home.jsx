@@ -1,77 +1,9 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Zap, TrendingUp, BookOpen } from "lucide-react";
+import { posts, categories, getCategoryCount } from "../data/posts";
 
-const posts = [
-  {
-    id: 1,
-    title: "Top 10 AI Tools in 2025 You Must Try",
-    excerpt: "Discover the most powerful AI tools that are transforming how we work, create, and innovate.",
-    category: "AI Tools",
-    date: "July 28, 2025",
-    readTime: "5 min read",
-    image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&auto=format&fit=crop",
-    slug: "top-10-ai-tools-2025",
-  },
-  {
-    id: 2,
-    title: "React 19: What's New and Why It Matters",
-    excerpt: "A deep dive into React 19's new features and developer experience upgrades.",
-    category: "React",
-    date: "July 22, 2025",
-    readTime: "7 min read",
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop",
-    slug: "react-19-whats-new",
-  },
-  {
-    id: 3,
-    title: "The Rise of Agentic AI: Beyond Chatbots",
-    excerpt: "How autonomous AI agents are moving beyond simple chat to take real actions in the world.",
-    category: "Technology",
-    date: "July 15, 2025",
-    readTime: "6 min read",
-    image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format&fit=crop",
-    slug: "rise-of-agentic-ai",
-  },
-  {
-    id: 4,
-    title: "Tailwind CSS v4: Complete Guide",
-    excerpt: "Everything you need to know about Tailwind CSS v4 — new features and best practices.",
-    category: "Web Development",
-    date: "July 10, 2025",
-    readTime: "8 min read",
-    image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800&auto=format&fit=crop",
-    slug: "tailwind-css-v4-guide",
-  },
-  {
-    id: 5,
-    title: "Cybersecurity in the Age of AI",
-    excerpt: "How AI is both a threat and a defense in modern cybersecurity.",
-    category: "Cybersecurity",
-    date: "July 5, 2025",
-    readTime: "6 min read",
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop",
-    slug: "cybersecurity-age-of-ai",
-  },
-  {
-    id: 6,
-    title: "How to Start Freelancing as a Developer",
-    excerpt: "A practical guide to landing your first client and building a sustainable freelance career.",
-    category: "Freelancing",
-    date: "June 30, 2025",
-    readTime: "9 min read",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop",
-    slug: "start-freelancing-developer",
-  },
-];
-
-const categories = [
-  { name: "Artificial Intelligence", count: 24, color: "from-purple-500 to-purple-700" },
-  { name: "Web Development", count: 18, color: "from-cyan-500 to-cyan-700" },
-  { name: "React", count: 15, color: "from-blue-500 to-blue-700" },
-  { name: "JavaScript", count: 20, color: "from-yellow-500 to-yellow-700" },
-  { name: "Cybersecurity", count: 12, color: "from-red-500 to-red-700" },
-  { name: "Freelancing", count: 10, color: "from-green-500 to-green-700" },
-];
+// Home shows only the 6 most recent posts as a preview.
+const featuredPosts = posts.slice(0, 6);
 
 export default function Home() {
   return (
@@ -140,7 +72,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
+            {featuredPosts.map((post) => (
               <article key={post.id} className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 hover:transform hover:-translate-y-1">
                 <div className="relative overflow-hidden h-48">
                   <img
@@ -187,10 +119,10 @@ export default function Home() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {categories.map((cat) => (
-              <Link key={cat.name} to="/categories" className="group relative bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-300 overflow-hidden">
+              <Link key={cat.name} to={`/blog?category=${encodeURIComponent(cat.name)}`} className="group relative bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-300 overflow-hidden">
                 <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                 <h3 className="text-white font-semibold mb-1">{cat.name}</h3>
-                <p className="text-gray-500 text-sm">{cat.count} articles</p>
+                <p className="text-gray-500 text-sm">{getCategoryCount(cat.name)} articles</p>
               </Link>
             ))}
           </div>
