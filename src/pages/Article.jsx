@@ -1,24 +1,54 @@
+import { useEffect, useState } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, ChevronRight, Share2, Link as LinkIcon } from "lucide-react";
-import { posts, getPostBySlug, getRelatedPosts } from "../data/posts";
+import { ChevronRight, Share2, Link as LinkIcon } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { getPostBySlug, getRelatedPosts } from "../services/publicPostsService";
+import { formatPostDate } from "../utils/formatDate";
 
 export default function Article() {
   const { slug } = useParams();
-  const post = getPostBySlug(slug);
+  const [post, setPost] = useState(null);
+  const [relatedPosts, setRelatedPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  // If someone visits a slug that doesn't exist, send them back to the
-  // blog list instead of showing a broken page.
-  if (!post) {
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setNotFound(false);
+    (async () => {
+      try {
+        const found = await getPostBySlug(slug);
+        if (!active) return;
+        if (!found) {
+          setNotFound(true);
+          return;
+        }
+        setPost(found);
+        const related = await getRelatedPosts(found, 3);
+        if (active) setRelatedPosts(related);
+      } catch (err) {
+        console.error("Failed to load article:", err);
+        if (active) setNotFound(true);
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  if (notFound) {
     return <Navigate to="/blog" replace />;
   }
 
-  const relatedPosts = getRelatedPosts(post, 3);
-
-  const currentIndex = posts.findIndex((p) => p.id === post.id);
-  const prevPost = posts[currentIndex - 1];
-  const nextPost = posts[currentIndex + 1];
+  if (loading || !post) {
+    return <div className="pt-24 pb-20 px-4 text-center text-gray-500">Loading article…</div>;
+  }
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const authorName = post.author?.name || "TechNest AI";
 
   return (
     <article className="pt-24 pb-20 px-4">
@@ -46,26 +76,26 @@ export default function Article() {
 
         {/* Meta row */}
         <div className="flex items-center gap-3 text-gray-500 text-sm mb-8 pb-8 border-b border-white/10">
-          <img src={post.author.avatar} alt={post.author.name} className="w-9 h-9 rounded-full" />
-          <span className="text-gray-300 font-medium">{post.author.name}</span>
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center text-white text-sm font-semibold">
+            {authorName.charAt(0).toUpperCase()}
+          </div>
+          <span className="text-gray-300 font-medium">{authorName}</span>
           <span>•</span>
-          <span>{post.date}</span>
+          <span>{formatPostDate(post.publishedAt)}</span>
           <span>•</span>
-          <span>{post.readTime}</span>
+          <span>{post.readingTime} min read</span>
         </div>
 
         {/* Featured Image */}
-        <div className="rounded-2xl overflow-hidden mb-10">
-          <img src={post.image} alt={post.title} className="w-full h-auto object-cover" />
-        </div>
+        {post.featuredImage?.url && (
+          <div className="rounded-2xl overflow-hidden mb-10">
+            <img src={post.featuredImage.url} alt={post.title} className="w-full h-auto object-cover" />
+          </div>
+        )}
 
         {/* Article Content */}
-        <div className="prose prose-invert max-w-none mb-12">
-          {post.content.map((paragraph, i) => (
-            <p key={i} className="text-gray-300 text-lg leading-relaxed mb-6">
-              {paragraph}
-            </p>
-          ))}
+        <div className="prose-content max-w-none mb-12">
+          <ReactMarkdown>{post.content}</ReactMarkdown>
         </div>
 
         {/* Share Buttons */}
@@ -109,45 +139,13 @@ export default function Article() {
 
         {/* Author Box */}
         <div className="flex items-start gap-4 bg-white/5 border border-white/10 rounded-2xl p-6 mb-16">
-          <img src={post.author.avatar} alt={post.author.name} className="w-14 h-14 rounded-full flex-shrink-0" />
-          <div>
-            <p className="text-white font-semibold mb-1">Written by {post.author.name}</p>
-            <p className="text-gray-400 text-sm">{post.author.bio}</p>
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center text-white text-lg font-semibold flex-shrink-0">
+            {authorName.charAt(0).toUpperCase()}
           </div>
-        </div>
-
-        {/* Previous / Next Article */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
-          {prevPost ? (
-            <Link
-              to={`/blog/${prevPost.slug}`}
-              className="group bg-white/5 border border-white/10 rounded-xl p-5 hover:border-purple-500/50 transition-colors"
-            >
-              <span className="flex items-center gap-1 text-gray-500 text-xs mb-2">
-                <ArrowLeft size={12} /> Previous
-              </span>
-              <p className="text-white text-sm font-medium line-clamp-2 group-hover:text-purple-400 transition-colors">
-                {prevPost.title}
-              </p>
-            </Link>
-          ) : (
-            <div />
-          )}
-          {nextPost ? (
-            <Link
-              to={`/blog/${nextPost.slug}`}
-              className="group bg-white/5 border border-white/10 rounded-xl p-5 text-right hover:border-purple-500/50 transition-colors"
-            >
-              <span className="flex items-center justify-end gap-1 text-gray-500 text-xs mb-2">
-                Next <ArrowRight size={12} />
-              </span>
-              <p className="text-white text-sm font-medium line-clamp-2 group-hover:text-purple-400 transition-colors">
-                {nextPost.title}
-              </p>
-            </Link>
-          ) : (
-            <div />
-          )}
+          <div>
+            <p className="text-white font-semibold mb-1">Written by {authorName}</p>
+            <p className="text-gray-400 text-sm">Editor at TechNest AI.</p>
+          </div>
         </div>
 
         {/* Related Posts */}
@@ -162,7 +160,7 @@ export default function Article() {
                   className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-purple-500/50 transition-colors"
                 >
                   <div className="h-32 overflow-hidden">
-                    <img src={rp.image} alt={rp.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={rp.featuredImage?.url} alt={rp.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div className="p-4">
                     <p className="text-white text-sm font-medium line-clamp-2 group-hover:text-purple-400 transition-colors">

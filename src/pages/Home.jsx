@@ -1,11 +1,38 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Zap, TrendingUp, BookOpen } from "lucide-react";
-import { posts, categories, getCategoryCount } from "../data/posts";
-
-// Home shows only the 6 most recent posts as a preview.
-const featuredPosts = posts.slice(0, 6);
+import { listPublicPosts } from "../services/publicPostsService";
+import { listCategories } from "../services/categoriesService";
+import { formatPostDate } from "../utils/formatDate";
+import { colorForIndex } from "../utils/categoryColors";
 
 export default function Home() {
+  const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const [{ posts: latest }, cats] = await Promise.all([
+          listPublicPosts({ pageSize: 6 }),
+          listCategories(),
+        ]);
+        if (!active) return;
+        setPosts(latest);
+        setCategories(cats);
+      } catch (err) {
+        console.error("Failed to load homepage content:", err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div>
       {/* Hero
@@ -19,10 +46,6 @@ export default function Home() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
 
-        {/* Balanced hero text block: heading, subtitle, and buttons now
-            follow a consistent size ratio and spacing rhythm instead of
-            the heading being disproportionately large next to the
-            subtitle. */}
         <div className="relative text-center px-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-1.5 mb-8">
             <Zap size={13} className="text-purple-400" />
@@ -71,63 +94,77 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredPosts.map((post) => (
-              <article key={post.id} className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 hover:transform hover:-translate-y-1">
-                <div className="relative overflow-hidden h-48">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3">
-                    <span className="bg-purple-600/90 text-white text-xs font-medium px-3 py-1 rounded-full">
-                      {post.category}
-                    </span>
+          {loading ? (
+            <div className="text-center text-gray-500 py-16">Loading articles…</div>
+          ) : posts.length === 0 ? (
+            <div className="text-center text-gray-500 py-16">
+              No articles published yet — check back soon.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <article key={post.id} className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 hover:transform hover:-translate-y-1">
+                  <div className="relative overflow-hidden h-48">
+                    <img
+                      src={post.featuredImage?.url}
+                      alt={post.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-purple-600/90 text-white text-xs font-medium px-3 py-1 rounded-full">
+                        {post.category}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3 text-gray-500 text-xs mb-3">
-                    <span>{post.date}</span>
-                    <span>•</span>
-                    <span>{post.readTime}</span>
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 text-gray-500 text-xs mb-3">
+                      <span>{formatPostDate(post.publishedAt)}</span>
+                      <span>•</span>
+                      <span>{post.readingTime} min read</span>
+                    </div>
+                    <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-purple-400 transition-colors line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm line-clamp-2 mb-4">{post.excerpt}</p>
+                    <Link to={`/blog/${post.slug}`} className="text-purple-400 text-sm font-medium hover:text-purple-300 flex items-center gap-1">
+                      Read More <ArrowRight size={14} />
+                    </Link>
                   </div>
-                  <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-purple-400 transition-colors line-clamp-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">{post.excerpt}</p>
-                  <Link to={`/blog/${post.slug}`} className="text-purple-400 text-sm font-medium hover:text-purple-300 flex items-center gap-1">
-                    Read More <ArrowRight size={14} />
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Categories */}
-      <section className="py-20 px-4 bg-white/2">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="flex items-center gap-2 justify-center mb-2">
-              <BookOpen size={18} className="text-cyan-400" />
-              <span className="text-cyan-400 text-sm font-medium uppercase tracking-wider">Browse</span>
+      {categories.length > 0 && (
+        <section className="py-20 px-4 bg-white/2">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="flex items-center gap-2 justify-center mb-2">
+                <BookOpen size={18} className="text-cyan-400" />
+                <span className="text-cyan-400 text-sm font-medium uppercase tracking-wider">Browse</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white">Explore Categories</h2>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white">Explore Categories</h2>
-          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {categories.map((cat) => (
-              <Link key={cat.name} to={`/blog?category=${encodeURIComponent(cat.name)}`} className="group relative bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-300 overflow-hidden">
-                <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                <h3 className="text-white font-semibold mb-1">{cat.name}</h3>
-                <p className="text-gray-500 text-sm">{getCategoryCount(cat.name)} articles</p>
-              </Link>
-            ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {categories.map((cat, i) => (
+                <Link
+                  key={cat.id}
+                  to={`/blog?category=${encodeURIComponent(cat.name)}`}
+                  className="group relative bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-300 overflow-hidden"
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${colorForIndex(i)} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                  <h3 className="text-white font-semibold mb-1">{cat.name}</h3>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Newsletter */}
       <section className="py-20 px-4">
