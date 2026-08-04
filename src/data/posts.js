@@ -171,7 +171,18 @@ export function getPostBySlug(slug) {
 // Convenience helper: get up to `limit` related posts (same category,
 // excluding the current post itself).
 export function getRelatedPosts(currentPost, limit = 3) {
-  return posts
-    .filter((p) => p.category === currentPost.category && p.id !== currentPost.id)
-    .slice(0, limit);
+  const sameCategory = posts.filter(
+    (p) => p.category === currentPost.category && p.id !== currentPost.id
+  );
+
+  if (sameCategory.length >= limit) {
+    return sameCategory.slice(0, limit);
+  }
+
+  // Not enough posts in the same category — fill the rest with other posts.
+  const others = posts.filter(
+    (p) => p.id !== currentPost.id && !sameCategory.includes(p)
+  );
+
+  return [...sameCategory, ...others].slice(0, limit);
 }
