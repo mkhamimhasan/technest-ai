@@ -1,5 +1,5 @@
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage } from '../firebase/config';
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 const MAX_DIMENSION = 1920; // px — plenty for a full-bleed blog hero image
 const JPEG_QUALITY = 0.82;
@@ -38,9 +38,9 @@ async function compressImage(file) {
 }
 
 /**
- * Uploads a single image under /blog-images/ and returns its public URL.
- * Filenames are timestamp-prefixed to avoid collisions when publishing
- * from a phone where two images might share the same camera filename.
+ * Uploads a single image to Cloudinary under the "blog-images" folder
+ * and returns its public URL. Cloudinary auto-assigns a unique public_id,
+ * so filename collisions aren't a concern.
  */
 export async function uploadBlogImage(file, { onProgress } = {}) {
   if (!file.type.startsWith('image/')) {
@@ -54,18 +54,28 @@ export async function uploadBlogImage(file, { onProgress } = {}) {
   onProgress?.(10);
   const optimized = await compressImage(file);
 
-  const safeName = optimized.name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
-  const path = `blog-images/${Date.now()}-${safeName}`;
-  const storageRef = ref(storage, path);
+  const formData = new FormData();
+  formData.append('file', optimized);
+  formData.append('upload_preset', UPLOAD_PRESET);
+  formData.append('folder', 'blog-images');
 
-  // uploadBytes is a single-shot upload; onProgress is a coarse placeholder
-  // here (swap to uploadBytesResumable if you want a live progress bar later).
   onProgress?.(50);
-  const snapshot = await uploadBytes(storageRef, optimized);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    { method: 'POST', body: formData }
+  );
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || 'Image upload failed.');
+  }
+
+  const data = await res.json();
   onProgress?.(100);
 
-  const url = await getDownloadURL(snapshot.ref);
-  return { url, path };
+  // path = Cloudinary's public_id, needed later for deletion
+  return { url: data.secure_url, path: data.public_id };
 }
 
 export async function uploadMultipleBlogImages(files, { onProgress } = {}) {
@@ -78,15 +88,19 @@ export async function uploadMultipleBlogImages(files, { onProgress } = {}) {
   return results;
 }
 
-/** Deletes an image from Storage given its full path (not URL). */
+/**
+ * Deletes an image from Cloudinary given its public_id.
+ * NOTE: Unsigned deletion isn't supported client-side by Cloudinary for
+ * security reasons — this requires a small server-side/Cloud Function
+ * endpoint using your API secret. For now this is a placeholder that
+ * warns instead of throwing, so it won't block the rest of your CMS.
+ */
 export async function deleteBlogImage(path) {
   if (!path) return;
-  try {
-    await deleteObject(ref(storage, path));
-  } catch (err) {
-    // Non-fatal — the doc reference is removed either way, don't block the user.
-    console.warn('Could not delete storage file:', path, err.message);
-  }
+  console.warn(
+    'Cloudinary deletion requires a server-side endpoint (API secret). ' +
+    'Image not deleted from storage:', path
+  );
 }
 
 export default { uploadBlogImage, uploadMultipleBlogImages, deleteBlogImage };
