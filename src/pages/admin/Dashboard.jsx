@@ -52,10 +52,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total posts" value={stats?.total ?? 0} icon={FileText} accent="indigo" loading={loading} />
-        <StatCard label="Published" value={stats?.published ?? 0} icon={CheckCircle2} accent="emerald" loading={loading} />
-        <StatCard label="Drafts" value={stats?.drafts ?? 0} icon={PenLine} accent="cyan" loading={loading} />
-        <StatCard label="Scheduled" value={stats?.scheduled ?? 0} icon={Clock} accent="amber" loading={loading} />
+        <StatCard label="Total posts" value={stats?.total ?? 0} icon={FileText} accent="indigo" loading={loading} to="/admin/posts" />
+        <StatCard label="Published" value={stats?.published ?? 0} icon={CheckCircle2} accent="emerald" loading={loading} to="/admin/posts?status=published" />
+        <StatCard label="Drafts" value={stats?.drafts ?? 0} icon={PenLine} accent="cyan" loading={loading} to="/admin/posts?status=draft" />
+        <StatCard label="Scheduled" value={stats?.scheduled ?? 0} icon={Clock} accent="amber" loading={loading} to="/admin/posts?status=scheduled" />
       </div>
 
       {isEmpty && (

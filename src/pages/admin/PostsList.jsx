@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Search, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { listPosts, deletePost } from '../../services/postsService';
@@ -15,10 +15,13 @@ const FILTERS = [
 ];
 
 export default function PostsList() {
+  const [searchParams] = useSearchParams();
+  const initialStatus = searchParams.get('status') ?? '';
+
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [search, setSearch] = useState('');
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
